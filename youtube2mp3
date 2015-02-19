@@ -1,5 +1,5 @@
 #!/bin/sh
 NAME=`wget --quiet "$1" -O - |grep '<meta name="title" content'|\
-    sed -e 's/.*<meta name="title" content="//g'|\
-    sed -e 's/">$//g'|tr " " "_" `
-youtube-dl -o - "$1" |ffmpeg -i - -f mp3 -ab 192000 -vn "$NAME.mp3"
+sed -e 's/.*<meta name="title" content="//g'|\
+sed -e 's/">$//g'|tr "& :;" "____" `
+youtube-dl -o - "$1" |avconv -i - -f mp3 -vn "$NAME.mp3"
