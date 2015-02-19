@@ -1,0 +1,5 @@
+#!/bin/bash
+[ $# -ge 1 -a -f "$1" ] && input="$1" || input="-"
+cat $input |\
+        sed -e  's_"http://[^\"]*"_\0\n_g'|grep \"http|\
+        sed -e 's/.*http/http/g'|sed -e 's/".*//g'
