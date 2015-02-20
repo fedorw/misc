@@ -1,5 +1,6 @@
 #!/bin/bash
 # download mp3's from bandcamp
+# Usage : bandcamp-dl  URL
 
 if [ ! -e /usr/bin/jq ] ; then
 	echo install 'jq'
