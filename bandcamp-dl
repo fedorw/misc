@@ -1,0 +1,42 @@
+#!/bin/bash
+# download mp3's from bandcamp
+
+if [ ! -e /usr/bin/jq ] ; then
+	echo install 'jq'
+	exit 0
+fi
+if [ ! -e /usr/bin/wget ] ; then
+	echo install 'wget'
+	exit 0
+fi
+
+input="-"
+
+if [ $# -ge 1 ]; then
+	input="$1"  
+fi
+
+get () {
+	echo '{ "tracks": ' 
+	wget "$input" -O - |grep 'trackinfo : '|sed -e 's/,$//g'|sed -e 's/.*trackinfo : //g' 
+	echo '}'  
+}
+
+get |\
+	jq  -c '.tracks[] | {title: .title, url:.file."mp3-128"}' |\
+	tr '{}' '  '|\
+	sed -e 's/"title":"//g'|\
+	sed -e 's/","url":/|/g'|\
+	tr "," "\|" |\
+	nl -nrz -w2 -s'|'   |\
+	awk -F'|' '{ 
+		gsub(/ |,|:|;/,"_",$2)
+		gsub(/"/," ",$3)
+		printf("wget  -O %02d_%s.mp3 %s\n" ,$1,$2,$3); 
+	}' | while read CMD
+do
+exec $CMD
+done
+	
+
+
