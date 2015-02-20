@@ -36,7 +36,7 @@ get |\
 		printf("wget  -O %02d_%s.mp3 %s\n" ,$1,$2,$3); 
 	}' | while read CMD
 do
-exec $CMD
+`$CMD`
 done
 	
 
