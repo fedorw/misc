@@ -1,0 +1,48 @@
+#!/usr/bin/perl
+use Config::Simple;
+use LWP::UserAgent;
+use HTTP::Headers;
+use HTTP::Message;
+use XML::Simple;
+use Data::Dumper;
+
+$cfg=Config::Simple->import_from($ENV{"HOME"}.'/.ns_api', \%Config);
+$user=$cfg->param('username');
+$password=$cfg->param('password');
+
+if ($#ARGV == 0 ) {
+	$station=$ARGV[0];
+} else {
+	$station=$cfg->param('station');
+}
+
+if ($station eq ""||$password eq ""||$user eq "") {
+   print "config error";
+   die;
+}
+
+$ua = LWP::UserAgent->new;
+$req = HTTP::Request->new(GET => "http://webservices.ns.nl/ns-api-avt?station=$station");
+$req->authorization_basic($user,$password);
+$res=$ua->request($req);
+
+#$xmldata=$req->content;
+
+$xmlparser=new XML::Simple;
+
+$data=$xmlparser->XMLin($res->content);
+
+foreach my $d (@{$data->{VertrekkendeTrein}}) {
+	my $tijd=$d->{VertrekTijd};
+	$tijd=~s/.*T//;
+	$tijd=~s/\+.*//;
+	printf("%-8s %4s %-20s %s\n",
+		$tijd,
+		$d->{VertrekSpoor}->{'content'},
+		$d->{EindBestemming},
+		$d->{RouteTekst},
+		$d->{VertrekVertraging}
+	);
+}
+
+
